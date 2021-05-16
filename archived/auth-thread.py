@@ -76,9 +76,10 @@ while True:
     padded_data += padder.finalize()
     ciphertext = encryptor.update(padded_data) + encryptor.finalize()
     hashmac = hmac.HMAC(HMAC_key, hashes.SHA256())
-    hashmac.update(ciphertext)
+    hashmac.update(iv+ciphertext)
     signature = hashmac.finalize()
-    mysock.send(signature)
+    mysock.send(iv)
     mysock.send(ciphertext)
+    mysock.send(signature)
 
 mysock.close()

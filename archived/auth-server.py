@@ -1,6 +1,9 @@
 import socket
 from threading import Thread, Event
 
+# HMAC
+from cryptography.hazmat.primitives import hashes, hmac
+
 mysock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 # mysock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 mysock.bind((socket.gethostname(), 8500))
@@ -18,28 +21,26 @@ while True:
     
     def listener():
         while True:
-            try:
-                data = clientsocket.recv(512)
-            except:
-                break
-            if data.decode() == "exit":
+            iv = clientsocket.recv(512)
+            # tester avec hashmac = "machin".encode()
+            ciphertext = clientsocket.recv(512)
+            hashmac = clientsocket.recv(512)
+
+
+            h = hmac.HMAC(key, hashes.SHA256())
+            h.update(iv+ciphertext)
+            h.verify(hashmac)
+
+            cipher = Cipher(algorithms.AES(key), modes.CBC(iv))
+            decryptor = cipher.decryptor()
+            message = decryptor.update(ciphertext) + decryptor.finalize()
+            if message.decode() == "exit":
                 print("=== Le client a coupé la connection ===")
                 print("Appuyez sur Entrée pour continuer")
                 mainexit.set()
                 break
             print("\033[1;31m",end="")
-            print(data.decode(),"\033[0m")
-            try:
-                data = clientsocket.recv(512)
-            except:
-                break
-            if data.decode() == "exit":
-                print("=== Le client a coupé la connection ===")
-                print("Appuyez sur Entrée pour continuer")
-                mainexit.set()
-                break
-            print("\033[1;31m",end="")
-            print(data.decode(),"\033[0m")
+            print(message.decode(),"\033[0m")
         
     thread = Thread(target=listener)
     thread.start()
