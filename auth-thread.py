@@ -79,6 +79,6 @@ while True:
     hashmac.update(ciphertext)
     signature = hashmac.finalize()
     mysock.send(signature)
-    mysock.send(signature+ciphertext)
+    mysock.send(ciphertext)
 
 mysock.close()
