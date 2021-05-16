@@ -14,13 +14,17 @@ mainexit = Event()
 def listener():
     global mysock
     while True:
-        data = mysock.recv(512)
+        try:
+            data = mysock.recv(512)
+        except:
+            break
         if data.decode() == "exit":
             print("=== Le serveur s'est déconnecté ===")
+            print("Appuyez sur Entrée pour quitter")
             mainexit.set()
             break
         print("\033[1;31m",end="")
-        print(data.decode(),"\033[0m\n",end="")
+        print(data.decode(),"\033[0m")
 
 thread = Thread(target=listener)
 thread.start()
