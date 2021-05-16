@@ -52,19 +52,23 @@ while True:
     
     def listener():
         while True:
-            iv = clientsocket.recv(512)
             # tester avec hashmac = "machin".encode()
-            ciphertext = clientsocket.recv(512)
+            iv_ciphertext = clientsocket.recv(512)
+            print(base64.standard_b64encode(iv_ciphertext))
             hashmac = clientsocket.recv(512)
+            print(base64.standard_b64encode(hashmac))
 
 
             h = hmac.HMAC(HMAC_key, hashes.SHA256())
-            h.update(iv+ciphertext)
+            h.update(iv_ciphertext)
             h.verify(hashmac)
 
-            cipher = Cipher(algorithms.AES(derived_key), modes.CBC(iv))
+            cipher = Cipher(algorithms.AES(derived_key), modes.CBC(iv_ciphertext[:16]))
             decryptor = cipher.decryptor()
-            message = decryptor.update(ciphertext) + decryptor.finalize()
+            data = decryptor.update(iv_ciphertext[16:]) + decryptor.finalize()
+            unpadder = padding.PKCS7(128).unpadder()
+            message = unpadder.update(data)
+            message += unpadder.finalize()
             if message.decode() == "exit":
                 print("=== Le client a coupé la connection ===")
                 print("Appuyez sur Entrée pour continuer")

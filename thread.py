@@ -78,8 +78,7 @@ while True:
     hashmac = hmac.HMAC(HMAC_key, hashes.SHA256())
     hashmac.update(iv+ciphertext)
     signature = hashmac.finalize()
-    mysock.send(iv)
-    mysock.send(ciphertext)
+    mysock.send(iv+ciphertext)
     mysock.send(signature)
 
 mysock.close()
