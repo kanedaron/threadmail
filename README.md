@@ -1,10 +1,6 @@
 # Threadmail
 
-## A X25519/AES secured and threaded python messenger
-
----
-
-To use
+A X25519/AES secured and threaded python messenger
 
 ### On the server
 
