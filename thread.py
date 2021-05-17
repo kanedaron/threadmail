@@ -36,7 +36,7 @@ HMAC_key = HKDF(
 ).derive(shared_key)
 
 mysock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-mysock.connect(("35.240.31.174", 8500))
+mysock.connect((os.environ['HOST_IP'],os.getenv('HOST_PORT', 8500)))
 
 print("=== Connecté au serveur ===")
 print("Envoyez le message 'exit' pour terminer le programme\n")
@@ -51,14 +51,12 @@ def listener():
             iv_ciphertext = mysock.recv(512)
         except:
             print("=== Le serveur s'est déconnecté ===")
-            print("Appuyez sur Entrée pour quitter")
             break
         # print(base64.standard_b64encode(iv_ciphertext))
         try:
             hashmac = mysock.recv(512)
         except:
             print("=== Le serveur s'est déconnecté ===")
-            print("Appuyez sur Entrée pour quitter")
             break
         # print(base64.standard_b64encode(hashmac))
 

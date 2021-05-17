@@ -17,7 +17,7 @@ from threading import Thread, Event
 
 mysock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 # mysock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-mysock.bind((socket.gethostname(), 8500))
+mysock.bind((socket.gethostname(), os.getenv('PORT', 8500)))
 mysock.listen(5)
 
 # Setting up the cryptography
