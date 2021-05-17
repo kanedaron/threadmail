@@ -47,9 +47,19 @@ def listener():
     global mysock
     while True:
         # Récupération des données TCP entrantes
-        iv_ciphertext = mysock.recv(512)
+        try:
+            iv_ciphertext = mysock.recv(512)
+        except:
+            print("=== Le serveur s'est déconnecté ===")
+            print("Appuyez sur Entrée pour quitter")
+            break
         # print(base64.standard_b64encode(iv_ciphertext))
-        hashmac = mysock.recv(512)
+        try:
+            hashmac = mysock.recv(512)
+        except:
+            print("=== Le serveur s'est déconnecté ===")
+            print("Appuyez sur Entrée pour quitter")
+            break
         # print(base64.standard_b64encode(hashmac))
 
         # Vérification immédiate de l'intégrité du message

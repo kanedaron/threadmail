@@ -53,9 +53,19 @@ while True:
     def listener():
         while True:
             # Récupération des données TCP entrantes
-            iv_ciphertext = clientsocket.recv(512)
+            try:
+                iv_ciphertext = clientsocket.recv(512)
+            except:
+                print("=== Le client a coupé la connection ===")
+                print("Appuyez sur Entrée pour continuer")
+                break
             # print(base64.standard_b64encode(iv_ciphertext))
-            hashmac = clientsocket.recv(512)
+            try:
+                hashmac = clientsocket.recv(512)
+            except:
+                print("=== Le client a coupé la connection ===")
+                print("Appuyez sur Entrée pour continuer")
+                break
             # print(base64.standard_b64encode(hashmac))
 
             # Vérification immédiate de l'intégrité du message
