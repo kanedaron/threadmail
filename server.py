@@ -52,20 +52,22 @@ while True:
     
     def listener():
         while True:
-            # tester avec hashmac = "machin".encode()
+            # Récupération des données TCP entrantes
             iv_ciphertext = clientsocket.recv(512)
-            print(base64.standard_b64encode(iv_ciphertext))
+            # print(base64.standard_b64encode(iv_ciphertext))
             hashmac = clientsocket.recv(512)
-            print(base64.standard_b64encode(hashmac))
+            # print(base64.standard_b64encode(hashmac))
 
-
+            # Vérification immédiate de l'intégrité du message
             h = hmac.HMAC(HMAC_key, hashes.SHA256())
             h.update(iv_ciphertext)
             h.verify(hashmac)
 
+            # Chiffrement AES effectif
             cipher = Cipher(algorithms.AES(derived_key), modes.CBC(iv_ciphertext[:16]))
             decryptor = cipher.decryptor()
             data = decryptor.update(iv_ciphertext[16:]) + decryptor.finalize()
+            # Ajout du "padding" final
             unpadder = padding.PKCS7(128).unpadder()
             message = unpadder.update(data)
             message += unpadder.finalize()
