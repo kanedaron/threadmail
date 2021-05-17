@@ -71,6 +71,7 @@ while True:
             unpadder = padding.PKCS7(128).unpadder()
             message = unpadder.update(data)
             message += unpadder.finalize()
+            # Affichage du message déchiffré
             if message.decode() == "exit":
                 print("=== Le client a coupé la connection ===")
                 print("Appuyez sur Entrée pour continuer")
@@ -87,9 +88,20 @@ while True:
         if mainexit.is_set():
             break
         if mail == "exit":
-            clientsocket.send(mail.encode())
-            break
-        clientsocket.send(mail.encode())       
+            mainexit.set()
+            print("Appuyez sur Entrée pour quitter")
+        iv = os.urandom(16)
+        cipher = Cipher(algorithms.AES(derived_key), modes.CBC(iv))
+        encryptor = cipher.encryptor()
+        padder = padding.PKCS7(128).padder()
+        padded_data = padder.update(mail.encode())
+        padded_data += padder.finalize()
+        ciphertext = encryptor.update(padded_data) + encryptor.finalize()
+        hashmac = hmac.HMAC(HMAC_key, hashes.SHA256())
+        hashmac.update(iv+ciphertext)
+        signature = hashmac.finalize()
+        clientsocket.send(iv+ciphertext)
+        clientsocket.send(signature)    
   
     clientsocket.close()
     if input("exit?") == "y":

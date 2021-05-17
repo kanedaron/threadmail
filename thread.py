@@ -46,17 +46,33 @@ mainexit = Event()
 def listener():
     global mysock
     while True:
-        try:
-            data = mysock.recv(512)
-        except:
-            break
-        if data.decode() == "exit":
+        # Récupération des données TCP entrantes
+        iv_ciphertext = mysock.recv(512)
+        # print(base64.standard_b64encode(iv_ciphertext))
+        hashmac = mysock.recv(512)
+        # print(base64.standard_b64encode(hashmac))
+
+        # Vérification immédiate de l'intégrité du message
+        h = hmac.HMAC(HMAC_key, hashes.SHA256())
+        h.update(iv_ciphertext)
+        h.verify(hashmac)
+
+        # Chiffrement AES effectif
+        cipher = Cipher(algorithms.AES(derived_key), modes.CBC(iv_ciphertext[:16]))
+        decryptor = cipher.decryptor()
+        data = decryptor.update(iv_ciphertext[16:]) + decryptor.finalize()
+        # Ajout du "padding" final
+        unpadder = padding.PKCS7(128).unpadder()
+        message = unpadder.update(data)
+        message += unpadder.finalize()
+        # Affichage du message déchiffré
+        if message.decode() == "exit":
             print("=== Le serveur s'est déconnecté ===")
             print("Appuyez sur Entrée pour quitter")
             mainexit.set()
             break
         print("\033[1;31m",end="")
-        print(data.decode(),"\033[0m")
+        print(message.decode(),"\033[0m")
 
 thread = Thread(target=listener)
 thread.start()
@@ -66,8 +82,8 @@ while True:
     if mainexit.is_set():
         break
     if mail == "exit":
-        mysock.send(mail.encode())
-        break
+        mainexit.set()
+        print("Appuyez sur Entrée pour quitter")
     iv = os.urandom(16)
     cipher = Cipher(algorithms.AES(derived_key), modes.CBC(iv))
     encryptor = cipher.encryptor()
