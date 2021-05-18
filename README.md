@@ -1,6 +1,6 @@
 # Threadmail
 
-A X25519/AES secured and threaded python messenger
+A X25519/AES secured and threaded python messenger  
 Made by Nicolas Bonamour
 
 ### On the server
